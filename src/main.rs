@@ -139,6 +139,7 @@ fn run() -> std::result::Result<(), String> {
             Arg::with_name("bia")
                 .short("b")
                 .long("bia")
+                .requires("random")
                 .help("Pretend to be a burned-in-address"),
         )
         .arg(
@@ -163,7 +164,7 @@ fn run() -> std::result::Result<(), String> {
         return Ok(());
     } else if matches.is_present("ending") {
         let mut new = cur_addr.clone();
-        new.set_ending(MAC::new_random(bia).get_ending());
+        new.set_ending(MAC::new_random(false).get_ending());
         new
     } else if matches.is_present("another") {
         return Err("This option is currently not implemented.".to_string());
