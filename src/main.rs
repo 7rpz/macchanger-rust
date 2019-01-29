@@ -53,17 +53,30 @@ fn set_mac(sock: c_int, ifname: &str, addr: &MAC) -> Result<()> {
 }
 
 
-fn main() -> Result<()> {
-    let ifname = std::env::args().nth(1).expect("No interface name given");
+fn run() -> std::result::Result<(), String> {
+    let ifname = std::env::args()
+        .nth(1)
+        .ok_or("No interface name given".to_string())?;
 
-    let sock = get_socket().expect("Failed to open socket");
-    let cur_addr = get_mac(sock, &ifname).expect("Failed to get hardware address");
+    let sock = get_socket().map_err(|e| format!("Failed to open socket: {}", e))?;
+    let cur_addr =
+        get_mac(sock, &ifname).map_err(|e| format!("Failed to get hardware address: {}", e))?;
     let new_addr = MAC::new_random(true);
 
     println!("Old address: {}", cur_addr);
     println!("New address: {}", new_addr);
 
-    set_mac(sock, &ifname, &new_addr).expect("Failed to set new hardware address");
+    set_mac(sock, &ifname, &new_addr)
+        .map_err(|e| format!("Failed to set new hardware address: {}", e))?;
 
     Ok(())
+}
+
+
+fn main() {
+    let res = run();
+    match res {
+        Ok(_) => {}
+        Err(e) => println!("{}", e),
+    };
 }
