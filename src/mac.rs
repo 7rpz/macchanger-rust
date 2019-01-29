@@ -15,16 +15,16 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with macchanger.  If not, see <http://www.gnu.org/licenses/>.
 
+use std::convert::TryInto;
 use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
+use std::io::Read;
 
 use libc::sockaddr;
 
-use std::io::Read;
 
-
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct MAC {
     data: [u8; 6],
 }
@@ -49,6 +49,14 @@ impl MAC {
         }
 
         out
+    }
+
+    pub fn get_ending(&self) -> &[u8; 3] {
+        self.data[3..].try_into().unwrap()
+    }
+
+    pub fn set_ending(&mut self, ending: &[u8; 3]) {
+        self.data[3..].copy_from_slice(ending);
     }
 }
 
@@ -88,3 +96,8 @@ impl Display for MAC {
         )
     }
 }
+
+
+/*impl FromStr for MAC {
+    fn fmt(&self
+}*/

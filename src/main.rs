@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with macchanger.  If not, see <http://www.gnu.org/licenses/>.
 
-#![feature(termination_trait_lib, process_exitcode_placeholder)]
+#![feature(termination_trait_lib, process_exitcode_placeholder, try_from)]
 
 mod mac;
 
@@ -162,9 +162,9 @@ fn run() -> std::result::Result<(), String> {
     let new_addr = if matches.is_present("show") {
         return Ok(());
     } else if matches.is_present("ending") {
-        return Err("This option is currently not implemented.".to_string());
-    } else if matches.is_present("ending") {
-        return Err("This option is currently not implemented.".to_string());
+        let mut new = cur_addr.clone();
+        new.set_ending(MAC::new_random(bia).get_ending());
+        new
     } else if matches.is_present("another") {
         return Err("This option is currently not implemented.".to_string());
     } else if matches.is_present("any") {
@@ -177,7 +177,7 @@ fn run() -> std::result::Result<(), String> {
         return Err("This option is currently not implemented.".to_string());
     } else {
         return Err(
-            "Exactly one of the following options is required:\n".to_string() + &MODES.join(", "),
+            "Exactly one of the following options is required: ".to_string() + &MODES.join(", "),
         );
     };
 
