@@ -35,12 +35,18 @@ impl MAC {
         Self { data: [0u8; 6] }
     }
 
-    pub fn new_random() -> Self {
+    pub fn new_random(bia: bool) -> Self {
         let mut out = Self::new();
 
         // TODO: try different rngs here: urandom, hwrng, random, in this order
         let mut f = std::fs::File::open("/dev/urandom").unwrap();
         f.read_exact(&mut out.data).unwrap(); // then of course do not unwrap here...
+        out.data[0] &= 0xfc; // make sure it's not multicast and not locally-administered
+
+        if !bia {
+            // set locally-administered bit
+            out.data[0] |= 0x02;
+        }
 
         out
     }

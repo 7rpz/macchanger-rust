@@ -58,7 +58,7 @@ fn main() -> Result<()> {
 
     let sock = get_socket().expect("Failed to open socket");
     let cur_addr = get_mac(sock, &ifname).expect("Failed to get hardware address");
-    let new_addr = MAC::new_random();
+    let new_addr = MAC::new_random(true);
 
     println!("Old address: {}", cur_addr);
     println!("New address: {}", new_addr);
