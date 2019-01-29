@@ -5,7 +5,6 @@ authors = ["Urs Schulz <github@ursschulz.de>"]
 edition = "2018"
 description = "Program to change MAC addresses"
 license-file = "LICENSE"
-documentation = "https://docs.rs/macchanger/"
 homepage = "https://gitlab.com/faulesocke/macchanger-rust"
 repository = "https://gitlab.com/faulesocke/macchanger-rust"
 
