@@ -1,6 +1,6 @@
 [package]
 name = "macchanger"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Urs Schulz <github@ursschulz.de>"]
 edition = "2018"
 description = "Program to change MAC addresses"

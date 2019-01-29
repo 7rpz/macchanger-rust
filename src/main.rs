@@ -131,7 +131,6 @@ fn run() -> std::result::Result<(), String> {
                 .long("mac")
                 .takes_value(true)
                 .value_name("XX:XX:XX:XX:XX:XX")
-                .require_equals(true)
                 .help("Set the MAC XX:XX:XX:XX:XX:XX")
                 .conflicts_with_all(&conflicts("mac")),
         )
@@ -175,7 +174,11 @@ fn run() -> std::result::Result<(), String> {
     } else if matches.is_present("random") {
         MAC::new_random(bia)
     } else if matches.is_present("mac") {
-        return Err("This option is currently not implemented.".to_string());
+        matches
+            .value_of("mac")
+            .unwrap()
+            .parse()
+            .map_err(|e: mac::ParseMACError| e.to_string())?
     } else {
         return Err(
             "Exactly one of the following options is required: ".to_string() + &MODES.join(", "),
@@ -183,6 +186,10 @@ fn run() -> std::result::Result<(), String> {
     };
 
     println!("New MAC:       {}", new_addr);
+
+    if new_addr == cur_addr {
+        println!("{}", "It's the same MAC!!".yellow());
+    }
 
     set_mac(sock, &ifname, &new_addr)
         .map_err(|e| format!("Failed to set new hardware address: {}", e))?;

@@ -20,6 +20,8 @@ use std::fmt::Display;
 use std::fmt::Error;
 use std::fmt::Formatter;
 use std::io::Read;
+use std::num::ParseIntError;
+use std::str::FromStr;
 
 use libc::sockaddr;
 
@@ -98,6 +100,37 @@ impl Display for MAC {
 }
 
 
-/*impl FromStr for MAC {
-    fn fmt(&self
-}*/
+#[derive(Debug)]
+pub enum ParseMACError {
+    ParseIntError(ParseIntError),
+    FormatError,
+}
+
+
+impl Display for ParseMACError {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        match self {
+            ParseMACError::ParseIntError(e) => write!(f, "Failed to parse integer for MAC: {}", e),
+            ParseMACError::FormatError => write!(f, "MAC has invalid format"),
+        }
+    }
+}
+
+
+impl FromStr for MAC {
+    type Err = ParseMACError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut out = Self::new();
+
+        for (n, p) in s.split(':').enumerate() {
+            if n >= out.data.len() {
+                return Err(ParseMACError::FormatError);
+            }
+
+            out.data[n] = u8::from_str_radix(p, 16).map_err(|e| ParseMACError::ParseIntError(e))?;
+        }
+
+        Ok(out)
+    }
+}
