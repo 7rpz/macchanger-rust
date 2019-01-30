@@ -77,12 +77,9 @@ fn conflicts(mode: &str) -> Vec<&str> {
 
 
 fn run() -> std::result::Result<(), String> {
-    use clap::{App, Arg};
+    use clap::{app_from_crate, crate_authors, crate_description, crate_name, crate_version, Arg};
 
-    let matches = App::new("macchanger")
-        .version("0.1")
-        .author("Urs Schulz <github@ursschulz.de>")
-        .about("Program to change MAC addresses")
+    let matches = app_from_crate!("\n")
         .arg(
             Arg::with_name("show")
                 .short("s")
