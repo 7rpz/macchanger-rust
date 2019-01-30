@@ -40,28 +40,24 @@ impl MAC {
     pub fn new_random(bia: bool) -> Self {
         use std::fs::File;
 
-        for rng in &["/dev/urandom", "/dev/hwrng", "/dev/random"] {
-            let mut f = match File::open(rng).ok() {
-                Some(f) => f,
-                None => continue,
-            };
+        let mut out = ["/dev/urandom", "/dev/hwrng", "/dev/random"]
+            .iter()
+            .filter_map(|rng| File::open(rng).ok())
+            .filter_map(|mut f| {
+                let mut out = Self::new();
+                f.read_exact(&mut out.data).ok().map(|_| out)
+            })
+            .next()
+            .expect("No working random number generator!");
 
-            let mut out = Self::new();
-            match f.read_exact(&mut out.data) {
-                Ok(_) => (),
-                Err(_) => continue,
-            };
-
-            out.data[0] &= 0xfc; // make sure it's not multicast and not locally-administered
-            if !bia {
-                // set locally-administered bit
-                out.data[0] |= 0x02;
-            }
-
-            return out;
+        // make sure it's not multicast and not locally-administered
+        out.data[0] &= 0xfc;
+        if !bia {
+            // set locally-administered bit
+            out.data[0] |= 0x02;
         }
 
-        panic!("No working random number generator!");
+        out
     }
 
     pub fn get_ending(&self) -> &[u8; 3] {
