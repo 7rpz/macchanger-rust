@@ -17,7 +17,7 @@ ip link set eth0 up
 ```
 
 # Project status
-We have not yet finished implemented all the macchanger features. Currently only the following options are working:
+We have not yet finished implementing all the macchanger features. Currently only the following options are working:
 
 ```
 --show
