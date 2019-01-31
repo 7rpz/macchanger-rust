@@ -18,6 +18,7 @@
 #![feature(termination_trait_lib, process_exitcode_placeholder, try_from)]
 
 mod mac;
+mod ethtool;
 
 
 use netdevice::{get_hardware, set_hardware};
@@ -30,6 +31,7 @@ use std::process::ExitCode;
 use colored::Colorize;
 
 use mac::MAC;
+use ethtool::get_permanent_mac;
 
 
 /// Returns a new UDP socket
@@ -153,8 +155,10 @@ fn run() -> std::result::Result<(), String> {
     let cur_addr =
         get_mac(sock, &ifname).map_err(|e| format!("Failed to get hardware address: {}", e))?;
 
+    let prm_addr = get_permanent_mac(sock, &ifname).map_err(|e| format!("Failed to get permanent MAC: {}", e))?;
+
     println!("Current MAC:   {}", cur_addr);
-    println!("Permanent MAC: {}", "TODO");
+    println!("Permanent MAC: {}", prm_addr);
 
     let new_addr = if matches.is_present("show") {
         return Ok(());

@@ -60,6 +60,12 @@ impl MAC {
         out
     }
 
+    pub fn from_slice(slice: &[u8]) -> Self {
+        let mut out = Self::new();
+        out.data.copy_from_slice(slice);
+        out
+    }
+
     pub fn get_ending(&self) -> &[u8; 3] {
         self.data[3..].try_into().unwrap()
     }
