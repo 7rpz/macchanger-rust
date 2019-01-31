@@ -171,7 +171,7 @@ fn run() -> std::result::Result<(), String> {
     } else if matches.is_present("any") {
         return Err("This option is currently not implemented.".to_string());
     } else if matches.is_present("permanent") {
-        return Err("This option is currently not implemented.".to_string());
+        prm_addr
     } else if matches.is_present("random") {
         MAC::new_random(bia)
     } else if matches.is_present("mac") {
