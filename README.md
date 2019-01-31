@@ -28,3 +28,6 @@ We have not yet finished implementing all the macchanger features. Currently onl
 The options `-a` and `-A` will probably never be supported. See `macchanger --help` for more information.
 
 Also reading out the permanent MAC address is currently not implemented. But will be soon.
+
+# License
+This project is licensed under the GNU AGPL 3.0 or later.
