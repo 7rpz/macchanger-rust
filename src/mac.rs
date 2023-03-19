@@ -101,6 +101,18 @@ impl Into<[i8; 14]> for MAC {
     }
 }
 
+impl Into<[libc::c_char; 14]> for MAC {
+    fn into(self) -> [libc::c_char; 14] {
+        let mut out: [libc::c_char; 14]  = [0; 14];
+
+        for (n, b) in self.data.iter().enumerate() {
+            out[n] = *b as libc::c_char;
+        }
+
+        out
+    }
+}
+
 
 impl Display for MAC {
     fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {

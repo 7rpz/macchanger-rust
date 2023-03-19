@@ -15,8 +15,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with macchanger.  If not, see <http://www.gnu.org/licenses/>.
 
-#![feature(termination_trait_lib, process_exitcode_placeholder, try_from)]
-
 mod mac;
 mod ethtool;
 
