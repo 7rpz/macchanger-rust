@@ -57,7 +57,6 @@ fn set_mac(sock: c_int, ifname: &str, addr: &MAC) -> Result<()> {
     set_hardware(sock, ifname, old_addr)
 }
 
-
 const MODES: [&str; 7] = [
     "show",
     "ending",
@@ -68,86 +67,76 @@ const MODES: [&str; 7] = [
     "mac",
 ];
 
-fn conflicts(mode: &str) -> Vec<&str> {
-    let mut modes = MODES.to_vec();
-
-    modes.retain(|x| *x != mode);
-    modes
-}
-
-
 fn run() -> std::result::Result<(), String> {
-    use clap::{app_from_crate, crate_authors, crate_description, crate_name, crate_version, Arg};
+    use clap::builder::{Arg, Command};
 
-    let matches = app_from_crate!("\n")
+    let matches = Command::new("macchanger")
         .arg(
-            Arg::with_name("show")
-                .short("s")
+            Arg::new("show")
+                .short('s')
                 .long("show")
                 .help("Print the MAC address and exit")
-                .conflicts_with_all(&conflicts("show")),
+                .exclusive(true),
         )
         .arg(
-            Arg::with_name("ending")
-                .short("e")
+            Arg::new("ending")
+                .short('e')
                 .long("ending")
                 .help("Don't change the vendor bytes")
-                .conflicts_with_all(&conflicts("ending")),
+                .exclusive(true),
         )
         .arg(
-            Arg::with_name("another")
-                .short("a")
+            Arg::new("another")
+                .short('a')
                 .long("another")
                 .help("Set random vendor MAC of the same kind")
-                .conflicts_with_all(&conflicts("another")),
+                .exclusive(true),
         )
         .arg(
-            Arg::with_name("any")
-                .short("A")
+            Arg::new("any")
+                .short('A')
                 .long("any")
                 .help("Set random vendor MAC of any kind")
-                .conflicts_with_all(&conflicts("any")),
+                .exclusive(true),
         )
         .arg(
-            Arg::with_name("permanent")
-                .short("p")
+            Arg::new("permanent")
+                .short('p')
                 .long("permanent")
                 .help("Reset to original, permanent hardware MAC")
-                .conflicts_with_all(&conflicts("permanent")),
+                .exclusive(true),
         )
         .arg(
-            Arg::with_name("random")
-                .short("r")
+            Arg::new("random")
+                .short('r')
                 .long("random")
                 .help("Set fully random MAC")
-                .conflicts_with_all(&conflicts("random")),
+                .exclusive(true),
         )
         .arg(
-            Arg::with_name("mac")
-                .short("m")
+            Arg::new("mac")
+                .short('m')
                 .long("mac")
-                .takes_value(true)
                 .value_name("XX:XX:XX:XX:XX:XX")
                 .help("Set the MAC XX:XX:XX:XX:XX:XX")
-                .conflicts_with_all(&conflicts("mac")),
+                .exclusive(true),
         )
         .arg(
-            Arg::with_name("bia")
-                .short("b")
+            Arg::new("bia")
+                .short('b')
                 .long("bia")
                 .requires("random")
                 .help("Pretend to be a burned-in-address"),
         )
         .arg(
-            Arg::with_name("device")
+            Arg::new("device")
                 .required(true)
-                .index(1)
-                .empty_values(false),
+                .index(1),
         )
         .get_matches();
 
-    let ifname = matches.value_of("device").unwrap();
-    let bia = matches.is_present("bia");
+    let ifname = matches.get_one::<String>("device").expect("device is required");
+    let bia = matches.get_one::<bool>("bia").is_some();
 
     let sock = get_socket().map_err(|e| format!("Failed to open socket: {}", e))?;
     let cur_addr =
@@ -158,26 +147,22 @@ fn run() -> std::result::Result<(), String> {
     println!("Current MAC:   {}", cur_addr);
     println!("Permanent MAC: {}", prm_addr);
 
-    let new_addr = if matches.is_present("show") {
+    let new_addr = if matches.get_one::<bool>("show").is_some() {
         return Ok(());
-    } else if matches.is_present("ending") {
+    } else if matches.get_one::<bool>("ending").is_some() {
         let mut new = cur_addr.clone();
         new.set_ending(MAC::new_random(false).get_ending());
         new
-    } else if matches.is_present("another") {
+    } else if matches.get_one::<bool>("another").is_some() {
         return Err("This option is currently not implemented.".to_string());
-    } else if matches.is_present("any") {
+    } else if matches.get_one::<bool>("any").is_some() {
         return Err("This option is currently not implemented.".to_string());
-    } else if matches.is_present("permanent") {
+    } else if matches.get_one::<bool>("permanent").is_some() {
         prm_addr
-    } else if matches.is_present("random") {
+    } else if matches.get_one::<bool>("random").is_some() {
         MAC::new_random(bia)
-    } else if matches.is_present("mac") {
-        matches
-            .value_of("mac")
-            .unwrap()
-            .parse()
-            .map_err(|e: mac::ParseMACError| e.to_string())?
+    } else if let Some(mac) = matches.get_one::<String>("mac") {
+            mac.parse().map_err(|e: mac::ParseMACError| e.to_string())?
     } else {
         return Err(
             "Exactly one of the following options is required: ".to_string() + &MODES.join(", "),
